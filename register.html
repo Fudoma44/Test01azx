@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Register Page</title>
+
+  <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
+  
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Kanit&display=swap" rel="stylesheet">
+  
+  <link rel="stylesheet" type="text/css" href="styles.css">
+</head>
+<body>
+    <div class="warning-container" id="warning01">
+      <h2 style="color: #cc0000">คำเตือน!!</h2>
+      <p style="text-align: center;font-size: 17px;margin-top: -10px" >คุณได้ทำการสมัครสมาชิกที่ชื่อมีชื่อผู้ใช้ว่า</p>
+      <p style="text-align: center;font-size: 17px;margin-top: -10px;" >"<span id="result02" style="color: #cc0999"></span>" ก่อนแล้ว</p>
+      <p style="text-align: center;font-size: 17px;margin-top: -10px;" >คุณต้องการลบและทำการสมัครสมาชิคใหม่?</p>
+      <p style="text-align: center;font-size: 15px;margin-top: 15px;color: red" >! ขั้นตอนนี้ไม่สามารถยกเลิกภายหลังได้</p>
+      <button class="btn01z" onclick="deleteUser()" style="margin-right: 4px">สมัครสมาชิกใหม่</button>
+      <button class="btn01z" style="background-color: #cc0000" onclick="location.href ='login.html'" style="margin-left: 4px">ย้อนกลับ</button>
+    </div>
+    <div class="popup-container" id="loadingPopup">
+     <h2>Loading</h2>
+     <img src="https://img5.pic.in.th/file/secure-sv1/bb6633cbbedb4ff2ade723521c3219ff07f09fef_2_666x500.gif" alt="Loading..." style="height: 160px"/>
+      <h2 style="margin-top: -10px">Loading</h2>
+      <p style="text-align: center;font-size: 20px;margin-top: -20px">Please wait...</p>
+    </div>
+
+  <form id="Register-f">
+    <h2>สมัครสมาชิก</h2>
+    
+    <div class="input-container">
+      <label class="wuser0" for="username">ชื่อผู้ใช้</label>
+      <input type="text" id="username" name="username" required minlength="5" maxlength="15" placeholder="Username 5-15 characters" pattern="[A-Za-z0-9_.]+">
+    </div>
+    <div class="input-container">
+      <label for="email">อีเมล</label>
+      <input type="email" id="email" name="email" required maxlength="50"
+      placeholder="User@example.com">
+    </div>
+    <div class="input-container">
+      <label for="password">รหัสผ่าน</label>
+      <input type="password" id="password" name="password" required minlength="8" maxlength="22" placeholder="Min 8 characters">
+    </div>
+    <div class="input-container">
+      <label for="password2">ยืนยันรหัสผ่าน</label>
+      <input type="password" id="password2" name="password2" required minlength="8" maxlength="22" placeholder="Confirm password">
+    </div>
+    <label style="color: red;font-size: 15px">! มีการจำกัดในการสมัครสมาชิก</label>
+    <label style="color: red;font-size: 15px;margin-top: -9px;margin-bottom: 10px"> ! โปรดตรวจสอบข้อมูลก่อนกดสมัครสมาชิก</label>
+    <button type="submit" class="btn00z">สมัครสมาชิก</button>
+    <br>
+    <a href="login.html" style="font-size:15px">เข้าสู่ระบบ</a>
+  </form>
+
+  <script>
+  const checkRegister = localStorage.getItem('cRegister');
+  
+    // เช็คว่า userStatus มีค่าหรือไม่
+    if (checkRegister) {
+      document.getElementById('result02').textContent = checkRegister;
+      document.getElementById('warning01').style.display = 'block';
+      document.getElementById('Register-f').style.display = 'none';
+    }
+
+document.getElementById('Register-f').addEventListener('submit', async function(event) {
+      event.preventDefault(); // ป้องกัน form submission แบบปกติ
+      await register(); // เรียกฟังก์ชัน register
+    });
+    
+
+async function register() {
+  const username = document.getElementById('username').value;
+  const password = document.getElementById('password').value;
+  const password2 = document.getElementById('password2').value;
+  const email = document.getElementById('email').value;
+  document.getElementById('loadingPopup').style.display = 'block';
+  document.getElementById('Register-f').style.display = 'none';
+  
+  // ตรวจสอบว่า username และ email มีใน API หรือไม่
+  try {
+    const url = 'https://script.google.com/macros/s/AKfycbxH-0nuAf1TfKs-LMrGS5Ky-22OTLIXQbfAVQuDuQHgyDTtcsZ5ky9VpoAMbMwI8dw57A/exec';
+    const response = await fetch(url);
+    const userData = await response.json();
+
+    if (userData.users.some(u => u.username === username)) {
+      alert('Username already exists.');
+      window.location.href = 'register.html';
+      return;
+    }
+
+    if (userData.users.some(u => u.email === email)) {
+      alert('Email already exists.');
+      window.location.href = 'register.html';
+      return;
+    }
+  } catch (error) {
+    alert('เกิดปัญหาในการเชื่อมต่อ โปรดลองอีกครั้ง');
+    window.location.href = 'register.html';
+    console.error('Error checking username or email:', error);
+    return;
+  }
+  
+  if (password !== password2) {
+    alert('Password and Re-Password do not match.');
+    window.location.href = 'register.html';
+    return;
+  }
+
+  // ตรวจสอบเสร็จแล้วทำการลงทะเบียน
+  try {
+
+    const url = `https://script.google.com/macros/s/AKfycbxH-0nuAf1TfKs-LMrGS5Ky-22OTLIXQbfAVQuDuQHgyDTtcsZ5ky9VpoAMbMwI8dw57A/exec?action=addData&username=${username}&password=${password}&email=${email}`;
+    const response = await fetch(url);
+
+    // Handle the result as needed
+    alert('Sign up successful.');
+    localStorage.setItem('cRegister', username);
+    window.location.href = 'login.html';
+  } catch (error) {
+    alert('เกิดปัญหาในการเชื่อมต่อ โปรดลองอีกครั้ง');
+    window.location.href = 'register.html';
+    console.error('Error registering user:', error);
+  }
+}
+
+
+ async function deleteUser() {
+   try {
+    document.getElementById('loadingPopup').style.display = 'block';
+    document.getElementById('warning01').style.display = 'none';
+    
+    const url = `https://script.google.com/macros/s/AKfycbxH-0nuAf1TfKs-LMrGS5Ky-22OTLIXQbfAVQuDuQHgyDTtcsZ5ky9VpoAMbMwI8dw57A/exec?action=deleteData&username=${checkRegister}`;
+    const response = await fetch(url);
+
+    alert('Deleted Successful.');
+    localStorage.removeItem('cRegister');
+    window.location.href = 'register.html';
+      } catch (error) {
+    alert('เกิดปัญหาในการเชื่อมต่อ โปรดลองอีกครั้ง');
+    window.location.href = 'register.html';
+    console.error('Error delete user:', error);
+    }
+  }
+  
+  </script>
+
+</body>
+</html>
